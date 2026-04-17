@@ -1,12 +1,10 @@
 FROM node:20-alpine AS base
 WORKDIR /app
-COPY product-service/package.json ./
+COPY package.json .
 RUN npm install --omit=dev
-COPY logger.js ./
-COPY product-service/index.js ./
+COPY . .
 
 FROM base AS production
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
-EXPOSE 3002
 CMD ["node", "index.js"]

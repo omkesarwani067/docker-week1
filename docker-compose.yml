@@ -1,4 +1,3 @@
-version: '3.9'
 
 networks:
   platform-net:
@@ -26,33 +25,59 @@ services:
 
   auth-service:
     build:
-      context: ./auth-service
-      target: production
+      context: .
+      dockerfile: auth-service/Dockerfile
     environment:
       - NODE_ENV=production
       - PORT=3001
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
     networks:
       - platform-net
     restart: unless-stopped
 
   product-service:
     build:
-      context: ./product-service
-      target: production
+      context: .
+      dockerfile: product-service/Dockerfile
     environment:
       - NODE_ENV=production
       - PORT=3002
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
     networks:
       - platform-net
     restart: unless-stopped
 
   order-service:
     build:
-      context: ./order-service
-      target: production
+      context: .
+      dockerfile: order-service/Dockerfile
     environment:
       - NODE_ENV=production
       - PORT=3003
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+    networks:
+      - platform-net
+    restart: unless-stopped
+
+  log-processor:
+    build:
+      context: ./log-processor
+      target: production
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - POSTGRES_HOST=postgres
+      - POSTGRES_DB=observability
+      - POSTGRES_USER=platform
+      - POSTGRES_PASSWORD=platform_secret
+    depends_on:
+      - redis
+      - postgres
     networks:
       - platform-net
     restart: unless-stopped

@@ -1,13 +1,12 @@
 FROM node:20-alpine AS base
 WORKDIR /app
-COPY package.json .
+COPY order-service/package.json ./
 RUN npm install --omit=dev
-COPY . .
+COPY logger.js ./
+COPY order-service/index.js ./
 
 FROM base AS production
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 USER appuser
 EXPOSE 3003
-HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
-  CMD wget -qO- http://localhost:3003/health || exit 1
 CMD ["node", "index.js"]
